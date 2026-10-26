@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Gates of Olympus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #100522;
+      color: #ffffff;
+    }
+
+    .font-olympus {
+      font-family: 'Cinzel', serif;
+    }
+
+    /* Dynamic Sky Background */
+    .olympus-sky {
+      background: radial-gradient(circle at 50% 15%, #6b21a8 0%, #3b0764 40%, #15062b 82%, #080212 100%);
+      transition: background 1s ease;
+    }
+
+    .olympus-sky.free-spin-mode {
+      background: radial-gradient(circle at 50% 15%, #b91c1c 0%, #7c2d12 38%, #2e0927 78%, #0c0211 100%);
+    }
+
+    /* Subtle Cloud Animations */
+    @keyframes driftSlow {
+      0%, 100% { transform: translateX(-6%) translateY(0); }
+      50% { transform: translateX(6%) translateY(-5px); }
+    }
+    .cloud-anim { animation: driftSlow 20s ease-in-out infinite; }
+
+    /* Golden Greek Frame */
+    .greek-frame {
+      background: linear-gradient(180deg, #fef08a 0%, #d97706 30%, #78350f 70%, #fbbf24 100%);
+      padding: 4px;
+      border-radius: 14px;
+      box-shadow:
+        0 0 25px rgba(245, 158, 11, 0.3),
+        inset 0 0 8px rgba(255, 255, 255, 0.6),
+        0 10px 25px rgba(0, 0, 0, 0.75);
+    }
+
+    .greek-meander {
+      height: 6px;
+      background-color: #78350f;
+      background-image: repeating-linear-gradient(
+        90deg,
+        #fde68a 0px,
+        #fde68a 5px,
+        #78350f 5px,
+        #78350f 10px,
+        #f59e0b 10px,
+        #f59e0b 14px,
+        #78350f 14px,
+        #78350f 18px
+      );
+    }
+
+    /* Responsive 6x5 Slot Grid (~40dvh compact to give generous ~37-38dvh thumb zone below) */
+    .slot-board-height {
+      height: clamp(192px, 40dvh, 338px);
+    }
+
+    @media (min-width: 640px) {
+      .slot-board-height {
+        height: clamp(250px, 44dvh, 400px);
+      }
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-rows: repeat(5, minmax(0, 1fr));
+      gap: 3px;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(14, 5, 30, 0.96) 0%, rgba(34, 11, 64, 0.92) 50%, rgba(14, 5, 30, 0.97) 100%);
+      border-radius: 10px;
+      padding: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 640px) {
+      .slot-grid {
+        gap: 6px;
+        padding: 7px;
+      }
+      .greek-frame {
+        padding: 6px;
+        border-radius: 16px;
+      }
+    }
+
+    .slot-cell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 45%, rgba(88, 28, 135, 0.34) 0%, rgba(15, 7, 32, 0.68) 100%);
+      border: 1px solid rgba(251, 191, 36, 0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    /* Drop & Tumble Animations */
+    @keyframes symbolDropIn {
+      0% { transform: translateY(-135%) scale(0.88); opacity: 0; }
+      75% { transform: translateY(6%) scale(1.02); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    @keyframes symbolCascade {
+      0% { transform: translateY(-80%); }
+      78% { transform: translateY(4%); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes symbolDropOut {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(115%) scale(0.86); opacity: 0; }
+    }
+    @keyframes winExplode {
+      0% { transform: scale(1); filter: brightness(1); }
+      45% { transform: scale(1.18); filter: brightness(1.6) drop-shadow(0 0 12px #fde047); }
+      100% { transform: scale(0.1) rotate(10deg); opacity: 0; }
+    }
+
+    .anim-drop-in { animation: symbolDropIn var(--drop-dur, 0.3s) cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .anim-cascade { animation: symbolCascade var(--drop-dur, 0.25s) cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .anim-drop-out { animation: symbolDropOut 0.16s ease-in forwards; }
+    .symbol-exploding { animation: winExplode var(--explode-dur, 0.46s) ease-in-out forwards; }
+
+    .cell-winning {
+      border-color: #fde047 !important;
+      box-shadow: 0 0 15px rgba(250, 204, 21, 0.85), inset 0 0 10px rgba(250, 204, 21, 0.5) !important;
+      z-index: 20;
+    }
+
+    /* Multiplier Orb Pulse */
+    @keyframes orbPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.7)); }
+      50% { transform: scale(1.07); filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.95)); }
+    }
+    .orb-symbol { animation: orbPulse 1.8s ease-in-out infinite; }
+
+    /* Zeus Floating & Lightning Strike */
+    @keyframes zeusFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .zeus-float { animation: zeusFloat 3.2s ease-in-out infinite; }
+
+    @keyframes zeusArmStrike {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-36deg) translateY(-6px); }
+      65% { transform: rotate(14deg); }
+      100% { transform: rotate(0deg); }
+    }
+    .zeus-striking .zeus-arm-right {
+      transform-origin: 132px 112px;
+      animation: zeusArmStrike 0.6s ease-out;
+    }
+    .zeus-striking .zeus-eye {
+      fill: #67e8f9 !important;
+      filter: drop-shadow(0 0 8px #22d3ee) drop-shadow(0 0 16px #fff);
+    }
+    .zeus-striking .zeus-aura {
+      opacity: 1 !important;
+    }
+
+    @keyframes lightningScreen {
+      0%, 100% { opacity: 0; }
+      15% { opacity: 0.85; }
+      32% { opacity: 0.15; }
+      50% { opacity: 0.95; }
+    }
+    .flash-active { animation: lightningScreen 0.5s ease-out forwards; }
+
+    /* Spin / Play Button & Golden UI */
+    @keyframes slowSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes playPulse {
+      0%, 100% { transform: translateX(1.5px) scale(1); }
+      50% { transform: translateX(1.5px) scale(0.86); opacity: 0.75; }
+    }
+    .spin-idle { animation: slowSpin 10s linear infinite; }
+    .spin-fast { animation: slowSpin 0.38s linear infinite; }
+    #spinIcon.spin-fast + .play-emblem { animation: playPulse 0.45s ease-in-out infinite; }
+
+    .btn-gold {
+      background: radial-gradient(circle at 50% 30%, #fef9c3 0%, #fbbf24 45%, #d97706 80%, #92400e 100%);
+      color: #2c0e03;
+      border: 2.5px solid #fef9c3;
+      box-shadow:
+        0 0 28px rgba(245, 158, 11, 0.75),
+        0 6px 16px rgba(0, 0, 0, 0.65),
+        inset 0 2px 4px rgba(255, 255, 255, 0.9);
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.12s ease, box-shadow 0.15s ease;
+    }
+    .btn-gold:active:not(:disabled) {
+      transform: scale(0.91);
+      filter: brightness(1.08);
+      box-shadow: 0 0 36px rgba(253, 224, 71, 0.95), inset 0 2px 6px rgba(255, 255, 255, 0.95);
+    }
+    .btn-gold:disabled {
+      opacity: 0.45;
+      filter: grayscale(0.4);
+    }
+
+    .quick-bet-btn {
+      min-height: 30px;
+    }
+
+    /* Shake Animation for Wrong Konami Input */
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .animate-shake { animation: shakeError 0.35s ease; }
+
+    /* Sparkle Particle */
+    @keyframes particleFly {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+    .sparkle-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 30;
+      animation: particleFly 0.5s ease-out forwards;
+    }
+
+    /* Custom Range Slider for Admin Panel */
+    input[type="range"] {
+      accent-color: #f59e0b;
+    }
+  </style>
+</head>
+<body id="skyBg" class="olympus-sky flex flex-col justify-between select-none">
+
+  <!-- Ambient Background Clouds -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[280px] rounded-full bg-fuchsia-500/20 blur-3xl"></div>
+    <svg class="cloud-anim absolute top-8 -left-12 w-64 sm:w-96 opacity-20 text-purple-200" viewBox="0 0 400 140" fill="currentColor">
+      <path d="M55,110 C25,110 5,90 10,65 C15,42 40,35 62,42 C78,15 118,8 145,28 C168,10 212,12 232,38 C258,28 292,40 300,66 C330,66 355,85 348,108 Z" />
+    </svg>
+    <div class="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-[#070210] to-transparent"></div>
+  </div>
+
+  <!-- Full-Screen Lightning Strike Overlay -->
+  <div id="lightningOverlay" class="fixed inset-0 pointer-events-none z-40 opacity-0 bg-cyan-100/35 mix-blend-screen flex items-center justify-center">
+    <svg class="w-full h-full max-w-3xl" viewBox="0 0 800 600" fill="none">
+      <path d="M620 40 L470 200 L535 215 L360 390 L420 405 L230 565" stroke="#fef08a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 22px #38bdf8)" />
+      <path d="M470 200 L370 265 L395 280 L280 355" stroke="#bae6fd" stroke-width="4" stroke-linecap="round" />
+    </svg>
+  </div>
+
+  <!-- ================= 1. COMPACT TOP HEADER ================= -->
+  <header class="relative z-20 w-full max-w-4xl mx-auto px-3 pt-1.5 pb-0.5 flex items-center justify-between shrink-0">
+    <!-- Secret Trigger #1: Tap Lightning Crest 3x -->
+    <div class="flex items-center gap-2">
+      <button id="secretCrestBtn" type="button" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-300 via-amber-500 to-amber-800 p-0.5 shadow-md active:scale-95 focus:outline-none">
+        <div class="w-full h-full bg-[#1b0936] rounded-[10px] flex items-center justify-center text-amber-300 text-sm sm:text-base">
+          ⚡
+        </div>
+      </button>
+      <div>
+        <h1 class="font-olympus font-black text-sm sm:text-lg md:text-xl tracking-wider bg-gradient-to-b from-yellow-100 via-amber-300 to-amber-500 bg-clip-text text-transparent leading-none">
+          GATES OF OLYMPUS
+        </h1>
+        <p class="text-[9px] sm:text-[11px] text-purple-200/70 leading-tight mt-0.5">
+          Pay Anywhere 8+ • Pengali hingga 500x
+        </p>
+      </div>
+    </div>
+
+    <!-- Clean Right Icons: Paytable Info & Sound -->
+    <div class="flex items-center gap-1.5">
+      <button id="btnInfo" type="button" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-950/85 border border-amber-400/45 text-amber-200 font-olympus font-bold text-sm flex items-center justify-center active:scale-90">
+        i
+      </button>
+      <button id="btnSound" type="button" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-950/85 border border-amber-400/45 text-amber-200 flex items-center justify-center active:scale-90">
+        <svg id="iconSoundOn" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <svg id="iconSoundOff" class="w-4 h-4 sm:w-5 sm:h-5 hidden text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= 2. UPPER HERO BAR: FEATURE PILLS + ZEUS + MULTIPLIER ================= -->
+  <section class="relative z-10 w-full max-w-4xl mx-auto px-2.5 sm:px-4 py-0.5 shrink-0">
+    <div class="flex items-center justify-between gap-1.5 sm:gap-2.5 bg-[#16072c]/80 border border-amber-400/30 rounded-2xl px-2 py-1 backdrop-blur-sm">
+
+      <!-- Left: Compact Buy Free Spin & Ante Bet Buttons (No Truncation) -->
+      <div class="flex flex-col gap-1 flex-[1.15] min-w-0">
+        <button id="btnBuyFreeSpin" type="button" class="w-full rounded-xl px-2 py-1 bg-gradient-to-r from-rose-700 via-red-600 to-rose-800 border border-amber-300/80 flex items-center justify-between gap-1 shadow active:scale-95 disabled:opacity-40">
+          <span class="font-olympus font-extrabold text-[8.5px] sm:text-xs text-white leading-tight text-left">BELI FREE SPIN</span>
+          <span id="buyFsPriceLabel" class="text-[9.5px] sm:text-xs font-extrabold text-amber-200 bg-black/45 px-1.5 py-0.5 rounded shrink-0">20.000</span>
+        </button>
+
+        <button id="btnAnteBet" type="button" class="w-full rounded-xl px-2 py-1 bg-gradient-to-r from-purple-900 to-indigo-950 border border-amber-400/50 flex items-center justify-between gap-1 shadow active:scale-95 disabled:opacity-40">
+          <span class="font-olympus font-bold text-[8.5px] sm:text-xs text-amber-200 leading-tight text-left">TARUHAN GANDA</span>
+          <span id="anteStatusBadge" class="text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">OFF</span>
+        </button>
+      </div>
+
+      <!-- Center: Animated Zeus Character (Secret Trigger #2: Tap Zeus 3x) -->
+      <div id="zeusContainer" class="zeus-float relative w-14 h-14 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center cursor-pointer">
+        <div class="zeus-aura opacity-30 transition-opacity duration-300 absolute inset-0 rounded-full bg-cyan-400/35 blur-xl pointer-events-none"></div>
+        <svg class="w-full h-full drop-shadow-[0_6px_12px_rgba(0,0,0,0.8)]" viewBox="0 0 220 250" fill="none">
+          <!-- Cloud Base -->
+          <path d="M52 232 C38 232 34 218 46 210 C56 202 72 204 80 210 C94 196 126 196 138 210 C152 204 172 210 172 224 C172 234 156 240 138 240 L60 240 Z" fill="#e9d5ff" fill-opacity="0.85" />
+          <!-- White & Gold Toga -->
+          <path d="M74 118 L146 118 L156 214 L64 214 Z" fill="#f8fafc" stroke="#fbbf24" stroke-width="3" />
+          <path d="M78 118 L104 118 L150 206 L126 212 Z" fill="#f59e0b" />
+          <!-- Muscular Torso -->
+          <path d="M72 108 C72 95 148 95 148 108 L144 162 L76 162 Z" fill="#fdba74" />
+          <path d="M72 106 L102 106 L136 162 L98 162 Z" fill="#ffffff" stroke="#fbbf24" stroke-width="2.5" />
+          <!-- Belt -->
+          <rect x="73" y="158" width="74" height="12" rx="4" fill="#f59e0b" stroke="#78350f" stroke-width="2" />
+          <!-- Left Arm -->
+          <path d="M72 110 C52 120 48 144 58 160 C64 168 74 164 74 154 C68 144 70 130 78 124 Z" fill="#fdba74" />
+          <!-- Right Arm Holding Bolt -->
+          <g class="zeus-arm-right">
+            <path d="M144 110 C168 102 182 84 184 62 C185 52 173 50 168 60 C164 78 154 92 138 100 Z" fill="#fdba74" />
+            <polygon points="186,12 164,52 180,54 160,94 204,46 188,44" fill="#fef08a" stroke="#38bdf8" stroke-width="3" />
+          </g>
+          <!-- Head, Crown & Beard -->
+          <path d="M74 64 C62 72 60 100 72 112 C84 124 136 124 148 112 C160 100 158 72 146 64 C142 40 78 40 74 64 Z" fill="#e2e8f0" />
+          <rect x="86" y="58" width="48" height="46" rx="14" fill="#fdba74" />
+          <polygon points="82,60 90,40 102,54 110,34 118,54 130,40 138,60" fill="#fbbf24" stroke="#78350f" stroke-width="2" />
+          <ellipse class="zeus-eye" cx="99" cy="75" rx="5" ry="3.2" fill="#bae6fd" />
+          <ellipse class="zeus-eye" cx="121" cy="75" rx="5" ry="3.2" fill="#bae6fd" />
+          <path d="M82 86 C82 80 98 80 110 86 C122 80 138 80 138 86 C144 106 134 132 110 138 C86 132 76 106 82 86 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+        </svg>
+      </div>
+
+      <!-- Right: Total Multiplier Orb Box & Free Spin Status -->
+      <div class="flex flex-col items-end justify-center flex-[0.9] min-w-0">
+        <div class="w-full rounded-xl px-2 py-1 bg-gradient-to-b from-purple-950 to-[#110524] border border-amber-400/60 text-center shadow-inner">
+          <div id="multMeterLabel" class="text-[8.5px] sm:text-[10px] font-extrabold uppercase tracking-wider text-amber-200 truncate">
+            PENGALI PETIR
+          </div>
+          <div class="flex items-center justify-center gap-1">
+            <span id="totalMultiplierValue" class="font-olympus font-black text-base sm:text-2xl text-amber-300 leading-tight">x1</span>
+            <span id="fsBadgeInline" class="hidden px-1.5 py-0.5 rounded bg-rose-600 text-[9px] font-extrabold text-white">
+              FS: <span id="fsLeftInline">15</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 3. COMPACT SLOT PANEL (STOPS AT UPPER-MID LINE) ================= -->
+  <main class="relative z-10 shrink-0 w-full max-w-4xl mx-auto px-2.5 sm:px-4 pt-0.5 pb-1 flex flex-col">
+    <!-- Dynamic Ticker Banner -->
+    <div class="mb-1 rounded-xl bg-gradient-to-r from-[#1c0938] via-[#3b0f6b] to-[#1c0938] border border-amber-400/75 px-3 py-1 text-center shadow shrink-0">
+      <div id="bannerMainText" class="font-olympus font-extrabold text-[11px] sm:text-base text-amber-300 tracking-wide truncate">
+        RAIH 8+ SIMBOL SAMA DI MANA SAJA!
+      </div>
+    </div>
+
+    <!-- Compact 6x5 Temple Frame -->
+    <div class="greek-frame slot-board-height flex flex-col relative shrink-0">
+      <div class="greek-meander rounded-t-lg mb-0.5 shrink-0"></div>
+
+      <div id="slotGrid" class="slot-grid flex-1 min-h-0">
+        <!-- 30 Cells Injected via JS -->
+      </div>
+
+      <div class="greek-meander rounded-b-lg mt-0.5 shrink-0"></div>
+
+      <!-- Multiplier Calculation Overlay Popup -->
+      <div id="orbSumPopup" class="hidden pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/50 rounded-xl backdrop-blur-[2px]">
+        <div class="px-4 py-2.5 rounded-2xl bg-gradient-to-b from-purple-900 via-[#1f083b] to-black border-2 border-amber-300 shadow-2xl text-center">
+          <div class="text-[10px] font-extrabold uppercase tracking-widest text-cyan-300">SAMBARAN PETIR ZEUS!</div>
+          <div id="orbEquationText" class="font-olympus font-black text-lg sm:text-2xl text-amber-300 mt-0.5">
+            10.000 × 25x
+          </div>
+          <div id="orbFinalText" class="font-extrabold text-base sm:text-xl text-emerald-300">
+            = 250.000
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= 4. ENLARGED SPACIOUS BOTTOM CONTROL PANEL ================= -->
+  <footer class="relative z-20 flex-1 min-h-0 w-full max-w-4xl mx-auto px-2.5 sm:px-4 pt-0.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] flex flex-col">
+    <div class="flex-1 min-h-0 rounded-3xl bg-gradient-to-b from-[#1e0a3c]/95 via-[#140629]/98 to-[#0a0216] border-2 border-amber-400/55 px-3 sm:px-6 py-2.5 sm:py-3.5 shadow-[0_-10px_30px_rgba(0,0,0,0.75)] flex flex-col justify-between">
+
+      <!-- 1. Baris Atas Panel Bawah: 3 Kartu Indikator Kompak & Jelas (SALDO | MENANG | TARUHAN) -->
+      <div class="grid grid-cols-3 gap-2 text-center shrink-0">
+        <div class="rounded-2xl bg-black/50 border border-amber-400/30 py-1.5 px-1.5 shadow-inner flex flex-col justify-center">
+          <div class="text-[9px] sm:text-xs font-extrabold uppercase tracking-wider text-purple-300/85 leading-none">SALDO</div>
+          <div id="creditDisplay" class="font-extrabold text-xs sm:text-lg text-amber-300 tabular-nums truncate mt-1 leading-tight">250.000</div>
+        </div>
+        <div class="rounded-2xl bg-black/50 border border-emerald-400/30 py-1.5 px-1.5 shadow-inner flex flex-col justify-center">
+          <div class="text-[9px] sm:text-xs font-extrabold uppercase tracking-wider text-purple-300/85 leading-none">MENANG</div>
+          <div id="lastWinDisplay" class="font-extrabold text-xs sm:text-lg text-emerald-400 tabular-nums truncate mt-1 leading-tight">0</div>
+        </div>
+        <div class="rounded-2xl bg-black/50 border border-amber-400/30 py-1.5 px-1.5 shadow-inner flex flex-col justify-center">
+          <div class="text-[9px] sm:text-xs font-extrabold uppercase tracking-wider text-purple-300/85 leading-none">TARUHAN</div>
+          <div id="betDisplay" class="font-extrabold text-xs sm:text-lg text-white tabular-nums truncate mt-1 leading-tight">400</div>
+        </div>
+      </div>
+
+      <!-- 2. AREA TENGAH PANEL BAWAH (Dead-Center Ergonomic Thumb Zone) -->
+      <div class="flex-1 min-h-0 flex items-center justify-center my-auto py-1">
+        <div class="w-full flex items-center justify-center gap-1.5 sm:gap-4">
+
+          <!-- Sayap Kiri: [⚡ TURBO] & [−] -->
+          <div class="flex-1 flex items-center justify-end gap-1.5 sm:gap-3 min-w-0">
+            <button id="btnTurbo" type="button" class="h-14 flex-1 sm:flex-none sm:px-6 rounded-2xl bg-slate-900 border-2 border-slate-600 text-xs sm:text-sm font-extrabold text-slate-200 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 active:scale-95 transition shadow-lg">
+              <span class="text-sm sm:text-base leading-none">⚡</span>
+              <span class="leading-none">TURBO</span>
+            </button>
+
+            <button id="btnBetDown" type="button" class="w-11 h-14 sm:w-14 sm:h-14 rounded-2xl bg-purple-900 hover:bg-purple-800 border-2 border-amber-400/55 text-amber-200 font-black text-2xl flex items-center justify-center active:scale-90 disabled:opacity-40 shrink-0 shadow-lg">
+              −
+            </button>
+          </div>
+
+          <!-- TOMBOL UTAMA DI TENGAH: [PLAY / SPIN] Bulat Emas Menyala -->
+          <button id="btnSpin" type="button" aria-label="Play Spin" class="relative w-[78px] h-[78px] sm:w-[86px] sm:h-[86px] rounded-full btn-gold flex items-center justify-center shrink-0 ring-4 ring-amber-400/30 mx-0.5">
+            <!-- Cincin Panah Putar di Tepi Dalam -->
+            <svg id="spinIcon" class="w-[62px] h-[62px] sm:w-[70px] sm:h-[70px] text-[#2c0e03]/85 spin-idle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 16h5v5"></path>
+            </svg>
+            <!-- Ikon PLAY Tegas di Titik Tengah -->
+            <span class="play-emblem pointer-events-none absolute inset-0 flex items-center justify-center translate-x-[1.5px]">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 text-[#2c0e03] drop-shadow-[0_1px_0_rgba(255,255,255,0.65)]" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="7,5 20,12 7,19"></polygon>
+              </svg>
+            </span>
+          </button>
+
+          <!-- Sayap Kanan: [+] & [AUTO] -->
+          <div class="flex-1 flex items-center justify-start gap-1.5 sm:gap-3 min-w-0">
+            <button id="btnBetUp" type="button" class="w-11 h-14 sm:w-14 sm:h-14 rounded-2xl bg-purple-900 hover:bg-purple-800 border-2 border-amber-400/55 text-amber-200 font-black text-2xl flex items-center justify-center active:scale-90 disabled:opacity-40 shrink-0 shadow-lg">
+              +
+            </button>
+
+            <button id="btnAuto" type="button" class="h-14 flex-1 sm:flex-none sm:px-6 rounded-2xl bg-purple-900/95 border-2 border-amber-400/55 text-xs sm:text-sm font-extrabold text-amber-200 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 active:scale-95 transition shadow-lg">
+              <span class="text-xs sm:text-sm leading-none">🔄</span>
+              <span class="leading-none">AUTO</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3. Baris Bawah Panel: Pilihan BET CEPAT Terbagi Kiri-Kanan (Bebas Area Floating Bubble Tengah Bawah) -->
+      <div class="flex items-center justify-between gap-1 bg-black/35 rounded-2xl px-2 py-1.5 border border-white/10 shrink-0">
+        <!-- Grup Kiri: Label BET + 200 + 400 -->
+        <div class="flex-1 grid grid-cols-3 gap-1 items-center">
+          <span class="text-[8.5px] sm:text-[11px] font-extrabold uppercase tracking-wider text-amber-300/90 text-center leading-tight">
+            BET<br class="sm:hidden" /> CEPAT
+          </span>
+          <button data-betidx="0" type="button" class="quick-bet-btn py-1 rounded-lg bg-purple-950/80 border border-purple-700/50 text-[10px] sm:text-xs font-extrabold text-purple-200 active:scale-95 transition">200</button>
+          <button data-betidx="1" type="button" class="quick-bet-btn py-1 rounded-lg bg-amber-500 border border-yellow-200 text-[10px] sm:text-xs font-extrabold text-black active:scale-95 transition">400</button>
+        </div>
+
+        <!-- Ruang Aman Tengah Bawah (~64px di HP agar tidak tertutup floating icon/navigasi tengah) -->
+        <div class="w-16 sm:w-6 shrink-0 flex items-center justify-center pointer-events-none">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400/40"></span>
+        </div>
+
+        <!-- Grup Kanan: 1.2K + 5K + 25K -->
+        <div class="flex-1 grid grid-cols-3 gap-1 items-center">
+          <button data-betidx="3" type="button" class="quick-bet-btn py-1 rounded-lg bg-purple-950/80 border border-purple-700/50 text-[10px] sm:text-xs font-extrabold text-purple-200 active:scale-95 transition">1.2K</button>
+          <button data-betidx="5" type="button" class="quick-bet-btn py-1 rounded-lg bg-purple-950/80 border border-purple-700/50 text-[10px] sm:text-xs font-extrabold text-purple-200 active:scale-95 transition">5K</button>
+          <button data-betidx="7" type="button" class="quick-bet-btn py-1 rounded-lg bg-purple-950/80 border border-purple-700/50 text-[10px] sm:text-xs font-extrabold text-purple-200 active:scale-95 transition">25K</button>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ================= MODALS & SECRET INTERFACES ================= -->
+
+  <!-- A. SECRET KONAMI CODE PAD MODAL (Touch D-Pad + Keyboard Support) -->
+  <div id="modalKonami" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-[#130924] border-2 border-amber-400/70 p-5 shadow-2xl text-center">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-300">GERBANG OLYMPUS TERSEMBUNYI</span>
+        <button id="btnCloseKonami" type="button" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">✕</button>
+      </div>
+      <h3 class="font-olympus font-black text-lg text-white">KODE AKSES RAHASIA</h3>
+      <p class="text-[11px] text-purple-200/75 mt-0.5">Masukkan kombinasi klasik untuk membuka ruang kendali</p>
+
+      <!-- 10 Progress Dots -->
+      <div id="konamiDots" class="flex items-center justify-center gap-1.5 my-4 py-2 px-3 rounded-xl bg-black/50 border border-purple-700/40">
+        <!-- 10 dots rendered by JS -->
+      </div>
+
+      <!-- Touch Controller: Left D-Pad & Right B / A Buttons -->
+      <div class="flex items-center justify-between gap-4 my-3 px-2">
+        <!-- D-Pad -->
+        <div class="grid grid-cols-3 gap-1.5 w-36 h-36">
+          <div></div>
+          <button data-kkey="U" type="button" class="konami-btn rounded-xl bg-slate-800 active:bg-amber-500 active:text-black border border-slate-600 font-black text-lg text-white flex items-center justify-center shadow">↑</button>
+          <div></div>
+          <button data-kkey="L" type="button" class="konami-btn rounded-xl bg-slate-800 active:bg-amber-500 active:text-black border border-slate-600 font-black text-lg text-white flex items-center justify-center shadow">←</button>
+          <div class="rounded-lg bg-slate-900/80 flex items-center justify-center text-[10px] text-slate-600">✚</div>
+          <button data-kkey="R" type="button" class="konami-btn rounded-xl bg-slate-800 active:bg-amber-500 active:text-black border border-slate-600 font-black text-lg text-white flex items-center justify-center shadow">→</button>
+          <div></div>
+          <button data-kkey="D" type="button" class="konami-btn rounded-xl bg-slate-800 active:bg-amber-500 active:text-black border border-slate-600 font-black text-lg text-white flex items-center justify-center shadow">↓</button>
+          <div></div>
+        </div>
+
+        <!-- B & A Arcade Buttons -->
+        <div class="flex items-center gap-3 pr-1">
+          <button data-kkey="B" type="button" class="konami-btn w-14 h-14 translate-y-3 rounded-full bg-rose-700 active:bg-amber-400 active:text-black border-2 border-rose-400 font-olympus font-black text-xl text-white shadow-lg flex items-center justify-center">
+            B
+          </button>
+          <button data-kkey="A" type="button" class="konami-btn w-14 h-14 -translate-y-3 rounded-full bg-emerald-600 active:bg-amber-400 active:text-black border-2 border-emerald-300 font-olympus font-black text-xl text-white shadow-lg flex items-center justify-center">
+            A
+          </button>
+        </div>
+      </div>
+
+      <div id="konamiStatusText" class="text-[11px] text-slate-400 mt-2">
+        Gunakan tombol layar atau keyboard fisik
+      </div>
+    </div>
+  </div>
+
+  <!-- B. FULL ADMIN PANEL OVERLAY -->
+  <div id="modalAdmin" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="w-full max-w-lg max-h-[92dvh] rounded-t-3xl sm:rounded-2xl bg-[#0e0b16] border-t-2 sm:border-2 border-amber-500/70 flex flex-col shadow-2xl overflow-hidden">
+      <!-- Admin Header -->
+      <div class="px-4 py-3 bg-gradient-to-r from-slate-900 via-[#1d1333] to-slate-900 border-b border-amber-500/30 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <h2 class="font-olympus font-black text-base sm:text-lg text-amber-300 tracking-wider">ZEUS ADMIN PANEL</h2>
+        </div>
+        <button id="btnCloseAdminTop" type="button" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">
+          TUTUP ✕
+        </button>
+      </div>
+
+      <!-- Scrollable Admin Body -->
+      <div class="p-4 overflow-y-auto space-y-4 text-xs sm:text-sm">
+
+        <!-- 1. Manajemen Saldo -->
+        <div class="rounded-xl bg-slate-900/90 border border-slate-700/80 p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-amber-300 uppercase tracking-wider text-xs">1. Manajemen Saldo</span>
+            <span id="adminCurrentBalance" class="font-bold text-emerald-400 tabular-nums">100.000</span>
+          </div>
+
+          <div class="flex gap-2">
+            <input id="adminBalanceInput" type="number" min="0" step="1000" placeholder="Ketik nominal saldo..." class="flex-1 rounded-xl bg-black/60 border border-slate-600 px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400" />
+            <button id="btnSetBalance" type="button" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold shrink-0 active:scale-95">
+              SET
+            </button>
+          </div>
+
+          <div class="grid grid-cols-4 gap-1.5">
+            <button data-addbal="100000" type="button" class="admin-addbal py-2 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-500/40 text-emerald-200 font-bold text-[11px] active:scale-95">+100Rb</button>
+            <button data-addbal="1000000" type="button" class="admin-addbal py-2 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-500/40 text-emerald-200 font-bold text-[11px] active:scale-95">+1 Juta</button>
+            <button data-addbal="10000000" type="button" class="admin-addbal py-2 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-500/40 text-emerald-200 font-bold text-[11px] active:scale-95">+10 Juta</button>
+            <button id="btnResetBalance" type="button" class="py-2 rounded-lg bg-rose-900/60 hover:bg-rose-800 border border-rose-500/40 text-rose-200 font-bold text-[11px] active:scale-95">Reset</button>
+          </div>
+        </div>
+
+        <!-- 2. Pengatur Jackpot & Petir Zeus -->
+        <div class="rounded-xl bg-slate-900/90 border border-slate-700/80 p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-amber-300 uppercase tracking-wider text-xs">2. Pengatur Jackpot & Petir</span>
+            <span id="adminPresetBadge" class="px-2 py-0.5 rounded bg-purple-900 text-purple-200 font-bold text-[10px]">MODE: NORMAL</span>
+          </div>
+
+          <!-- Preset Mode Buttons -->
+          <div class="grid grid-cols-4 gap-1.5">
+            <button data-preset="normal" type="button" class="preset-btn py-2 rounded-lg bg-slate-800 border border-amber-400 text-white font-bold text-[11px]">Normal</button>
+            <button data-preset="gacor" type="button" class="preset-btn py-2 rounded-lg bg-slate-800 border border-slate-600 text-emerald-300 font-bold text-[11px]">Gacor</button>
+            <button data-preset="maxwin" type="button" class="preset-btn py-2 rounded-lg bg-slate-800 border border-slate-600 text-amber-300 font-bold text-[11px]">Super Max</button>
+            <button data-preset="rungkad" type="button" class="preset-btn py-2 rounded-lg bg-slate-800 border border-slate-600 text-rose-400 font-bold text-[11px]">Rungkad</button>
+          </div>
+
+          <!-- Win Rate Slider -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-semibold">Win Rate (Peluang Simbol Pecah)</span>
+              <span id="lblWinRate" class="font-extrabold text-amber-300">35%</span>
+            </div>
+            <input id="sliderWinRate" type="range" min="0" max="100" value="35" class="w-full h-2 rounded-lg cursor-pointer" />
+          </div>
+
+          <!-- Multiplier Lightning Chance Slider -->
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300 font-semibold">Peluang Petir Multiplier</span>
+              <span id="lblOrbRate" class="font-extrabold text-cyan-300">18%</span>
+            </div>
+            <input id="sliderOrbRate" type="range" min="0" max="100" value="18" class="w-full h-2 rounded-lg cursor-pointer" />
+          </div>
+
+          <!-- Minimum Multiplier Selector -->
+          <div>
+            <div class="text-xs text-slate-300 font-semibold mb-1.5">Minimal Bola Pengali</div>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button data-minmult="0" type="button" class="minmult-btn py-1.5 rounded-lg bg-amber-500 text-black font-extrabold text-[11px]">Normal</button>
+              <button data-minmult="25" type="button" class="minmult-btn py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-600 font-bold text-[11px]">Min x25</button>
+              <button data-minmult="100" type="button" class="minmult-btn py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-600 font-bold text-[11px]">Min x100</button>
+              <button data-minmult="500" type="button" class="minmult-btn py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-600 font-bold text-[11px]">Pasti x500</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Trigger Instan Putaran Berikutnya -->
+        <div class="rounded-xl bg-slate-900/90 border border-slate-700/80 p-3.5 space-y-2">
+          <div class="font-extrabold text-amber-300 uppercase tracking-wider text-xs mb-1">
+            3. Trigger Instan (Spin Berikutnya)
+          </div>
+
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-slate-700/70 cursor-pointer">
+            <div>
+              <div class="font-bold text-white text-xs">Paksa Scatter (15 Free Spin)</div>
+              <div class="text-[10px] text-slate-400">4 Scatter Zeus otomatis turun di putaran depan</div>
+            </div>
+            <input id="chkForceScatter" type="checkbox" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" />
+          </label>
+
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-slate-700/70 cursor-pointer">
+            <div>
+              <div class="font-bold text-cyan-300 text-xs">Paksa Sambaran Petir x500</div>
+              <div class="text-[10px] text-slate-400">Zeus menjatuhkan bola x500 + kombinasi pecah</div>
+            </div>
+            <input id="chkForce500x" type="checkbox" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" />
+          </label>
+
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-slate-700/70 cursor-pointer">
+            <div>
+              <div class="font-bold text-amber-300 text-xs">Auto Maxwin (5.000x Taruhan)</div>
+              <div class="text-[10px] text-slate-400">Banjir Mahkota Olympus + Pengali Petir x500</div>
+            </div>
+            <input id="chkForceMaxwin" type="checkbox" class="w-5 h-5 accent-amber-500 rounded cursor-pointer" />
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Save & Return Button -->
+      <div class="p-3 bg-slate-950 border-t border-slate-800 shrink-0">
+        <button id="btnSaveAdmin" type="button" class="w-full py-3 rounded-xl btn-gold font-olympus font-black text-sm tracking-wider">
+          SIMPAN & KEMBALI BERMAIN
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. BUY FREE SPIN CONFIRMATION MODAL -->
+  <div id="modalBuyFs" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-xs greek-frame">
+      <div class="bg-[#1b0936] rounded-xl p-4 text-center">
+        <div class="text-[10px] font-extrabold uppercase tracking-widest text-amber-300">FITUR INSTAN</div>
+        <h3 class="font-olympus font-black text-xl text-white mt-0.5">BELI 15 FREE SPIN?</h3>
+        <div id="modalBuyPrice" class="my-3 py-2 px-3 rounded-xl bg-black/50 border border-amber-400/50 font-olympus font-black text-xl text-amber-300">
+          20.000
+        </div>
+        <div class="flex gap-2">
+          <button id="btnCancelBuyFs" type="button" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs">BATAL</button>
+          <button id="btnConfirmBuyFs" type="button" class="flex-1 py-2.5 rounded-xl btn-gold font-extrabold text-xs">BELI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D. AUTO SPIN MODAL -->
+  <div id="modalAuto" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-xs greek-frame">
+      <div class="bg-[#1b0936] rounded-xl p-4 text-center">
+        <h3 class="font-olympus font-black text-lg text-amber-300">PUTAR OTOMATIS</h3>
+        <div class="grid grid-cols-3 gap-2 my-3">
+          <button data-auto="10" type="button" class="auto-opt py-2.5 rounded-xl bg-purple-900 border border-amber-400/50 font-extrabold text-sm text-white active:scale-95">10x</button>
+          <button data-auto="30" type="button" class="auto-opt py-2.5 rounded-xl bg-purple-900 border border-amber-400/50 font-extrabold text-sm text-white active:scale-95">30x</button>
+          <button data-auto="100" type="button" class="auto-opt py-2.5 rounded-xl bg-purple-900 border border-amber-400/50 font-extrabold text-sm text-white active:scale-95">100x</button>
+        </div>
+        <button id="btnCloseAuto" type="button" class="w-full py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300">TUTUP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. CELEBRATION MODAL (BIG WIN / FREE SPIN / MAXWIN) -->
+  <div id="modalCelebration" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer">
+    <div class="w-full max-w-md text-center relative">
+      <div class="absolute inset-0 -z-10 bg-amber-500/25 blur-3xl rounded-full"></div>
+      <div id="celebBadge" class="inline-block px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-300 text-amber-200 font-extrabold text-[11px] uppercase tracking-widest mb-2">
+        KEMENANGAN BESAR!
+      </div>
+      <h2 id="celebTitle" class="font-olympus font-black text-3xl sm:text-5xl bg-gradient-to-b from-white via-yellow-200 to-amber-500 bg-clip-text text-transparent drop-shadow">
+        SENSATIONAL WIN!
+      </h2>
+      <div id="celebAmount" class="font-olympus font-black text-2xl sm:text-4xl text-emerald-300 mt-2">
+        500.000
+      </div>
+      <p id="celebSub" class="text-xs text-purple-200 mt-2">Ketuk layar untuk melanjutkan</p>
+    </div>
+  </div>
+
+  <!-- F. PAYTABLE INFO MODAL -->
+  <div id="modalInfo" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3">
+    <div class="w-full max-w-xl greek-frame max-h-[86dvh] flex flex-col">
+      <div class="bg-[#180830] rounded-xl p-4 overflow-y-auto space-y-3">
+        <div class="flex items-center justify-between border-b border-amber-400/30 pb-2">
+          <h3 class="font-olympus font-black text-base sm:text-lg text-amber-300">INFORMASI PEMBAYARAN</h3>
+          <button id="btnCloseInfo" type="button" class="w-7 h-7 rounded-lg bg-rose-700 font-bold text-xs text-white">✕</button>
+        </div>
+        <div id="paytableGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+        <div class="rounded-xl bg-purple-950/75 border border-amber-400/35 p-3 text-[11px] text-purple-100/90 space-y-1">
+          <div><strong class="text-amber-300">⚡ SCATTER ZEUS:</strong> 4, 5, atau 6 Scatter memicu <strong>15 Putaran Gratis</strong>.</div>
+          <div><strong class="text-cyan-300">🔮 BOLA PENGALI:</strong> Bernilai <strong>2x hingga 500x</strong>. Semua bola di layar dijumlahkan di akhir Tumble!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subtle Floating Toast -->
+  <div id="toastMsg" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300 px-3.5 py-1.5 rounded-xl bg-amber-400 text-[#230b00] font-extrabold text-xs shadow-xl border border-white whitespace-nowrap">
+    Notifikasi
+  </div>
+
+  <!-- ================= GAME LOGIC, KONAMI & ADMIN SCRIPT ================= -->
+  <script>
+    const COLS = 6;
+    const ROWS = 5;
+    const BASE_BETS = [200, 400, 800, 1200, 2000, 5000, 10000, 25000];
+    const KONAMI_SEQUENCE = ['U', 'U', 'D', 'D', 'L', 'R', 'L', 'R', 'B', 'A'];
+
+    const MULTIPLIER_ORBS = [
+      { val: 2, weight: 30, tier: 'green' },
+      { val: 3, weight: 24, tier: 'green' },
+      { val: 5, weight: 18, tier: 'green' },
+      { val: 8, weight: 12, tier: 'green' },
+      { val: 10, weight: 9, tier: 'blue' },
+      { val: 15, weight: 6, tier: 'blue' },
+      { val: 25, weight: 4, tier: 'blue' },
+      { val: 50, weight: 2, tier: 'purple' },
+      { val: 100, weight: 1, tier: 'purple' },
+      { val: 250, weight: 0.5, tier: 'red' },
+      { val: 500, weight: 0.25, tier: 'red' }
+    ];
+
+    const SYMBOLS = [
+      { id: 'gem_blue', name: 'Permata Biru', weight: 19, pay: [0.25, 0.75, 2.0], color: '#38bdf8' },
+      { id: 'gem_green', name: 'Zamrud Hijau', weight: 18, pay: [0.4, 0.9, 4.0], color: '#4ade80' },
+      { id: 'gem_yellow', name: 'Topaz Kuning', weight: 17, pay: [0.5, 1.0, 5.0], color: '#facc15' },
+      { id: 'gem_purple', name: 'Kecubung Ungu', weight: 15, pay: [0.8, 1.2, 8.0], color: '#c084fc' },
+      { id: 'gem_red', name: 'Delima Merah', weight: 14, pay: [1.0, 1.5, 10.0], color: '#fb7185' },
+      { id: 'chalice', name: 'Piala Emas', weight: 10, pay: [1.5, 2.0, 12.0], color: '#fcd34d' },
+      { id: 'ring', name: 'Cincin Rubi', weight: 8.5, pay: [2.0, 5.0, 15.0], color: '#f43f5e' },
+      { id: 'hourglass', name: 'Jam Pasir', weight: 7, pay: [2.5, 10.0, 25.0], color: '#fbbf24' },
+      { id: 'crown', name: 'Mahkota Olympus', weight: 5.5, pay: [10.0, 25.0, 50.0], color: '#fde047' },
+      { id: 'scatter', name: 'Scatter Zeus', weight: 2.1, pay: [3.0, 5.0, 100.0], color: '#fef08a', isScatter: true }
+    ];
+
+    // Core & Admin State
+    const state = {
+      balance: 250000,
+      betIndex: 1, // Default 400
+      anteBet: false,
+      isSpinning: false,
+      isTurbo: false,
+      soundEnabled: true,
+      autoSpinsLeft: 0,
+      inFreeSpins: false,
+      freeSpinsLeft: 0,
+      freeSpinsTotal: 0,
+      freeSpinAccumMultiplier: 0,
+      freeSpinSessionWin: 0,
+      forceBuyFreeSpins: false,
+      grid: [],
+
+      // Secret Konami Tracker
+      secretTapCount: 0,
+      secretTapTimer: null,
+      konamiProgress: [],
+
+      // Admin Engine Settings
+      admin: {
+        preset: 'normal',
+        winRate: 35,       // 0 - 100% (35 is balanced natural slot feel)
+        orbRate: 18,       // 0 - 100% chance of orbs appearing per spin/cascade
+        minOrbValue: 0,    // 0, 25, 100, 500
+        forceScatterNext: false,
+        force500xNext: false,
+        forceMaxwinNext: false
+      }
+    };
+
+    // ================= WEB AUDIO SYNTHESIZER =================
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      tone(freq, type = 'sine', dur = 0.14, vol = 0.11, slide = null) {
+        if (!state.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (slide) osc.frequency.exponentialRampToValueAtTime(slide, now + dur);
+          gain.gain.setValueAtTime(vol, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + dur);
+        } catch (e) {}
+      }
+      click() { this.tone(600, 'triangle', 0.05, 0.07, 840); }
+      konamiKey(idx) { this.tone(360 + idx * 55, 'square', 0.08, 0.06); }
+      konamiSuccess() {
+        [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.tone(f, 'triangle', 0.18, 0.12), i * 75));
+      }
+      reelDrop(c) { this.tone(140 - c * 8, 'triangle', 0.08, 0.12, 55); }
+      cascadeWin(step) {
+        const base = 440 * Math.pow(1.12, Math.min(step, 8));
+        [1, 1.25, 1.5, 2].forEach((m, i) => setTimeout(() => this.tone(base * m, 'sine', 0.22, 0.1), i * 50));
+      }
+      thunder() {
+        if (!state.soundEnabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const len = this.ctx.sampleRate * 0.55;
+          const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.2));
+          const src = this.ctx.createBufferSource();
+          src.buffer = buf;
+          const flt = this.ctx.createBiquadFilter();
+          flt.type = 'lowpass';
+          flt.frequency.setValueAtTime(1400, now);
+          flt.frequency.exponentialRampToValueAtTime(130, now + 0.52);
+          const g = this.ctx.createGain();
+          g.gain.setValueAtTime(0.3, now);
+          g.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+          src.connect(flt);
+          flt.connect(g);
+          g.connect(this.ctx.destination);
+          src.start(now);
+          this.tone(105, 'sawtooth', 0.42, 0.18, 36);
+        } catch (e) {}
+      }
+      fanfare() {
+        [523, 659, 784, 1046, 784, 1046, 1318].forEach((n, i) => {
+          setTimeout(() => this.tone(n, 'triangle', 0.28, 0.13), i * 100);
+        });
+      }
+    }
+
+    const audio = new SoundEngine();
+
+    // ================= SVG ARTWORK RENDERER =================
+    function getSymbolSVG(cell) {
+      if (cell.isMultiplier) {
+        const palettes = {
+          green: ['#86efac', '#16a34a', '#052e16'],
+          blue: ['#7dd3fc', '#0284c7', '#082f49'],
+          purple: ['#e879f9', '#9333ea', '#3b0764'],
+          red: ['#fde047', '#dc2626', '#450a0a']
+        };
+        const [light, mid, dark] = palettes[cell.orbTier || 'green'];
+        return `
+          <div class="orb-symbol relative w-[88%] h-[88%] flex items-center justify-center">
+            <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+              <path d="M4 42 Q20 20 34 38 L26 62 Q10 56 4 42 Z" fill="#fde047" stroke="#92400e" stroke-width="2"/>
+              <path d="M96 42 Q80 20 66 38 L74 62 Q90 56 96 42 Z" fill="#fde047" stroke="#92400e" stroke-width="2"/>
+              <circle cx="50" cy="52" r="34" fill="url(#orb_${cell.orbTier})" stroke="#fde047" stroke-width="4.5"/>
+              <ellipse cx="39" cy="39" rx="11" ry="6" transform="rotate(-28 39 39)" fill="#ffffff" fill-opacity="0.65"/>
+              <defs>
+                <radialGradient id="orb_${cell.orbTier}" cx="38%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="${light}"/>
+                  <stop offset="55%" stop-color="${mid}"/>
+                  <stop offset="100%" stop-color="${dark}"/>
+                </radialGradient>
+              </defs>
+            </svg>
+            <span class="absolute inset-0 flex items-center justify-center font-olympus font-black text-[11px] sm:text-sm md:text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">
+              ${cell.multValue}x
+            </span>
+          </div>`;
+      }
+
+      switch (cell.id) {
+        case 'gem_blue':
+          return `<svg viewBox="0 0 100 100" class="w-[76%] h-[76%] drop-shadow"><polygon points="50,8 88,50 50,92 12,50" fill="#0284c7" stroke="#bae6fd" stroke-width="3"/><polygon points="50,20 75,50 50,80 25,50" fill="#38bdf8"/><polygon points="50,20 75,50 50,50" fill="#e0f2fe" opacity="0.75"/></svg>`;
+        case 'gem_green':
+          return `<svg viewBox="0 0 100 100" class="w-[76%] h-[76%] drop-shadow"><polygon points="50,12 90,84 10,84" fill="#15803d" stroke="#bbf7d0" stroke-width="3" stroke-linejoin="round"/><polygon points="50,26 76,76 24,76" fill="#4ade80"/></svg>`;
+        case 'gem_yellow':
+          return `<svg viewBox="0 0 100 100" class="w-[76%] h-[76%] drop-shadow"><polygon points="30,12 70,12 92,50 70,88 30,88 8,50" fill="#ca8a04" stroke="#fef08a" stroke-width="3"/><polygon points="36,24 64,24 78,50 64,76 36,76 22,50" fill="#facc15"/></svg>`;
+        case 'gem_purple':
+          return `<svg viewBox="0 0 100 100" class="w-[76%] h-[76%] drop-shadow"><polygon points="50,10 90,40 75,88 25,88 10,40" fill="#7e22ce" stroke="#f3e8ff" stroke-width="3"/><polygon points="50,24 76,44 66,76 34,76 24,44" fill="#c084fc"/></svg>`;
+        case 'gem_red':
+          return `<svg viewBox="0 0 100 100" class="w-[76%] h-[76%] drop-shadow"><path d="M50 86 L16 48 A20 20 0 0 1 50 24 A20 20 0 0 1 84 48 Z" fill="#be123c" stroke="#fecdd3" stroke-width="3"/><path d="M50 74 L26 48 A13 13 0 0 1 50 33 A13 13 0 0 1 74 48 Z" fill="#fb7185"/></svg>`;
+        case 'chalice':
+          return `<svg viewBox="0 0 100 100" class="w-[82%] h-[82%] drop-shadow"><rect x="20" y="14" width="60" height="72" rx="14" fill="#1e1b4b" stroke="#fbbf24" stroke-width="3.5"/><path d="M30 26 H70 L62 54 Q50 64 38 54 Z" fill="#f59e0b" stroke="#fef08a" stroke-width="2"/><rect x="46" y="56" width="8" height="16" fill="#fbbf24"/><path d="M34 74 H66 L70 80 H30 Z" fill="#fde047"/><circle cx="50" cy="40" r="6" fill="#ef4444"/></svg>`;
+        case 'ring':
+          return `<svg viewBox="0 0 100 100" class="w-[82%] h-[82%] drop-shadow"><rect x="16" y="16" width="68" height="68" rx="14" fill="#311042" stroke="#fbbf24" stroke-width="3.5"/><circle cx="50" cy="56" r="19" fill="none" stroke="#fde047" stroke-width="7"/><polygon points="50,18 66,32 58,42 42,42 34,32" fill="#f43f5e" stroke="#fecdd3" stroke-width="2"/></svg>`;
+        case 'hourglass':
+          return `<svg viewBox="0 0 100 100" class="w-[82%] h-[82%] drop-shadow"><rect x="16" y="14" width="68" height="72" rx="14" fill="#0f2942" stroke="#fbbf24" stroke-width="3.5"/><rect x="28" y="22" width="44" height="7" rx="3" fill="#fde047"/><rect x="28" y="71" width="44" height="7" rx="3" fill="#fde047"/><path d="M34 29 H66 L53 50 L66 71 H34 L47 50 Z" fill="#38bdf8" fill-opacity="0.45" stroke="#fde047" stroke-width="2.5"/><polygon points="39,69 61,69 50,55" fill="#fbbf24"/></svg>`;
+        case 'crown':
+          return `<svg viewBox="0 0 100 100" class="w-[86%] h-[86%] drop-shadow"><rect x="12" y="14" width="76" height="72" rx="14" fill="#4c0519" stroke="#fde047" stroke-width="4"/><polygon points="22,68 18,36 38,50 50,26 62,50 82,36 78,68" fill="#fbbf24" stroke="#fef9c3" stroke-width="2.2" stroke-linejoin="round"/><rect x="22" y="68" width="56" height="9" rx="3" fill="#f59e0b"/><circle cx="50" cy="56" r="5" fill="#e11d48"/></svg>`;
+        case 'scatter':
+          return `
+            <div class="relative w-[90%] h-[90%] flex items-center justify-center">
+              <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-[0_0_10px_rgba(253,224,71,0.85)]">
+                <circle cx="50" cy="48" r="40" fill="#3b0764" stroke="#fde047" stroke-width="4.5"/>
+                <polygon points="28,34 36,20 45,30 50,16 55,30 64,20 72,34" fill="#fde047"/>
+                <circle cx="50" cy="46" r="15" fill="#fed7aa"/>
+                <path d="M34 52 Q50 46 66 52 Q64 74 50 78 Q36 74 34 52 Z" fill="#f8fafc"/>
+                <rect x="8" y="70" width="84" height="20" rx="6" fill="#b91c1c" stroke="#fde047" stroke-width="2.5"/>
+                <text x="50" y="84" text-anchor="middle" fill="#fef08a" font-family="Cinzel, serif" font-weight="900" font-size="13">SCATTER</text>
+              </svg>
+            </div>`;
+        default:
+          return '';
+      }
+    }
+
+    // ================= UTILITY HELPERS =================
+    function fmtNum(n) {
+      return Math.round(n).toLocaleString('id-ID');
+    }
+
+    function getBaseBet() {
+      return BASE_BETS[state.betIndex];
+    }
+
+    function getEffectiveBet() {
+      const b = getBaseBet();
+      return state.anteBet ? Math.round(b * 1.25) : b;
+    }
+
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms * (state.isTurbo ? 0.42 : 1)));
+    }
+
+    let toastTimeout = null;
+    function showToast(text) {
+      const el = document.getElementById('toastMsg');
+      el.textContent = text;
+      el.style.opacity = '1';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => { el.style.opacity = '0'; }, 2100);
+    }
+
+    function pickWeighted(items) {
+      const total = items.reduce((s, x) => s + x.weight, 0);
+      let r = Math.random() * total;
+      for (const item of items) {
+        if (r < item.weight) return item;
+        r -= item.weight;
+      }
+      return items[0];
+    }
+
+    function pickMultiplierOrb(forceVal = null) {
+      if (forceVal) {
+        const found = MULTIPLIER_ORBS.find(o => o.val === forceVal) || MULTIPLIER_ORBS[MULTIPLIER_ORBS.length - 1];
+        return {
+          id: 'multiplier_orb',
+          name: `Pengali ${found.val}x`,
+          isMultiplier: true,
+          multValue: found.val,
+          orbTier: found.tier
+        };
+      }
+      const minV = state.admin.minOrbValue;
+      const eligible = MULTIPLIER_ORBS.filter(o => o.val >= minV);
+      const picked = pickWeighted(eligible.length ? eligible : [MULTIPLIER_ORBS[MULTIPLIER_ORBS.length - 1]]);
+      return {
+        id: 'multiplier_orb',
+        name: `Pengali ${picked.val}x`,
+        isMultiplier: true,
+        multValue: picked.val,
+        orbTier: picked.tier
+      };
+    }
+
+    // Generate single cell respecting Admin WinRate, OrbRate & Hot Symbol
+    function generateCell({ forceScatter = false, allowScatter = true, allowOrb = true, hotSymbol = null, symbolCapCounts = null } = {}) {
+      if (forceScatter) {
+        return { ...SYMBOLS.find(s => s.isScatter) };
+      }
+
+      // Per-cell orb probability mapped from Admin OrbRate (0..100%)
+      // At 18% setting -> ~2.6% per cell (~55% per 30-cell spin). At 100% -> ~18% per cell!
+      const perCellOrbProb = (state.admin.orbRate / 100) * (state.inFreeSpins ? 0.2 : 0.15);
+      if (allowOrb && state.admin.orbRate > 0 && Math.random() < perCellOrbProb) {
+        return pickMultiplierOrb();
+      }
+
+      // If WinRate boosted and hotSymbol provided, bias towards hotSymbol
+      if (hotSymbol && Math.random() < hotSymbol.biasProb) {
+        return { ...hotSymbol.sym };
+      }
+
+      let pool = SYMBOLS.filter(s => allowScatter || !s.isScatter).map(s => {
+        if (s.isScatter) {
+          let w = s.weight;
+          if (state.anteBet && !state.inFreeSpins) w *= 2.1;
+          if (state.inFreeSpins) w *= 0.75;
+          if (state.admin.winRate < 15) w *= 0.2;
+          return { ...s, weight: w };
+        }
+        return s;
+      });
+
+      // If Rungkad / Low WinRate is active, prevent any symbol from reaching 8!
+      if (symbolCapCounts) {
+        const safePool = pool.filter(s => s.isScatter || (symbolCapCounts[s.id] || 0) < 7);
+        if (safePool.length > 0) pool = safePool;
+      }
+
+      const chosen = pickWeighted(pool);
+      if (symbolCapCounts && !chosen.isScatter) {
+        symbolCapCounts[chosen.id] = (symbolCapCounts[chosen.id] || 0) + 1;
+      }
+      return { ...chosen };
+    }
+
+    // ================= ZEUS & PARTICLE VISUALS =================
+    function triggerZeusStrike() {
+      audio.thunder();
+      const z = document.getElementById('zeusContainer');
+      const flash = document.getElementById('lightningOverlay');
+      z.classList.remove('zeus-striking');
+      flash.classList.remove('flash-active');
+      void z.offsetWidth;
+      z.classList.add('zeus-striking');
+      flash.classList.add('flash-active');
+      setTimeout(() => {
+        z.classList.remove('zeus-striking');
+        flash.classList.remove('flash-active');
+      }, 650);
+    }
+
+    function spawnParticles(cellEl, color = '#fde047') {
+      for (let i = 0; i < 6; i++) {
+        const sp = document.createElement('span');
+        sp.className = 'sparkle-particle';
+        const ang = (Math.PI * 2 * i) / 6 + Math.random() * 0.4;
+        const dist = 18 + Math.random() * 18;
+        sp.style.backgroundColor = i % 2 === 0 ? '#fef08a' : color;
+        sp.style.setProperty('--tx', `${Math.cos(ang) * dist}px`);
+        sp.style.setProperty('--ty', `${Math.sin(ang) * dist}px`);
+        cellEl.appendChild(sp);
+        setTimeout(() => sp.remove(), 520);
+      }
+    }
+
+    // ================= GRID BUILD & HUD =================
+    const slotGridEl = document.getElementById('slotGrid');
+
+    function initGridDOM() {
+      slotGridEl.innerHTML = '';
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const d = document.createElement('div');
+          d.className = 'slot-cell';
+          d.id = `cell-${c}-${r}`;
+          slotGridEl.appendChild(d);
+        }
+      }
+    }
+
+    function getCellEl(c, r) {
+      return document.getElementById(`cell-${c}-${r}`);
+    }
+
+    function populateIdleGrid() {
+      state.grid = [];
+      for (let c = 0; c < COLS; c++) {
+        const col = [];
+        let hasSc = false;
+        for (let r = 0; r < ROWS; r++) {
+          const cell = generateCell({ allowScatter: !hasSc, allowOrb: false });
+          if (cell.isScatter) hasSc = true;
+          col.push(cell);
+        }
+        state.grid.push(col);
+        for (let r = 0; r < ROWS; r++) {
+          getCellEl(c, r).innerHTML = `<div class="w-full h-full flex items-center justify-center">${getSymbolSVG(state.grid[c][r])}</div>`;
+        }
+      }
+    }
+
+    function updateHUD() {
+      document.getElementById('creditDisplay').textContent = fmtNum(state.balance);
+      document.getElementById('adminCurrentBalance').textContent = fmtNum(state.balance);
+      document.getElementById('betDisplay').textContent = fmtNum(getEffectiveBet());
+
+      const buyCost = getBaseBet() * 100;
+      document.getElementById('buyFsPriceLabel').textContent = fmtNum(buyCost);
+      document.getElementById('modalBuyPrice').textContent = fmtNum(buyCost);
+
+      const anteBadge = document.getElementById('anteStatusBadge');
+      if (state.anteBet) {
+        anteBadge.textContent = 'ON';
+        anteBadge.className = 'text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-400 text-black shrink-0';
+      } else {
+        anteBadge.textContent = 'OFF';
+        anteBadge.className = 'text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0';
+      }
+
+      const locked = state.isSpinning || state.inFreeSpins || state.autoSpinsLeft > 0;
+      document.getElementById('btnBuyFreeSpin').disabled = locked || state.anteBet;
+      document.getElementById('btnAnteBet').disabled = locked;
+      document.getElementById('btnBetDown').disabled = locked || state.betIndex === 0;
+      document.getElementById('btnBetUp').disabled = locked || state.betIndex === BASE_BETS.length - 1;
+
+      document.querySelectorAll('.quick-bet-btn').forEach(btn => {
+        const idx = parseInt(btn.getAttribute('data-betidx'), 10);
+        btn.disabled = locked;
+        const isSelected = idx === state.betIndex;
+        btn.className = isSelected
+          ? 'quick-bet-btn py-1 rounded-lg bg-amber-500 border border-yellow-200 text-[10px] sm:text-xs font-extrabold text-black active:scale-95 transition disabled:opacity-45'
+          : 'quick-bet-btn py-1 rounded-lg bg-purple-950/80 border border-purple-700/50 text-[10px] sm:text-xs font-extrabold text-purple-200 active:scale-95 transition disabled:opacity-45';
+      });
+
+      const btnAuto = document.getElementById('btnAuto');
+      if (state.autoSpinsLeft > 0) {
+        btnAuto.innerHTML = `<span class="text-[10px] leading-none">STOP</span><span class="text-xs font-black leading-none">${state.autoSpinsLeft}</span>`;
+        btnAuto.className = 'h-14 flex-1 sm:flex-none sm:px-6 rounded-2xl bg-rose-600 border-2 border-amber-200 text-xs sm:text-sm font-extrabold text-white flex flex-col items-center justify-center gap-0.5 active:scale-95 transition shadow-lg';
+      } else {
+        btnAuto.innerHTML = `<span class="text-xs sm:text-sm leading-none">🔄</span><span class="leading-none">AUTO</span>`;
+        btnAuto.className = 'h-14 flex-1 sm:flex-none sm:px-6 rounded-2xl bg-purple-900/95 border-2 border-amber-400/55 text-xs sm:text-sm font-extrabold text-amber-200 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 active:scale-95 transition shadow-lg';
+      }
+
+      const sky = document.getElementById('skyBg');
+      const fsInline = document.getElementById('fsBadgeInline');
+      const multLabel = document.getElementById('multMeterLabel');
+      const multVal = document.getElementById('totalMultiplierValue');
+
+      if (state.inFreeSpins) {
+        sky.classList.add('free-spin-mode');
+        fsInline.classList.remove('hidden');
+        document.getElementById('fsLeftInline').textContent = `${state.freeSpinsLeft}/${state.freeSpinsTotal}`;
+        multLabel.textContent = 'TOTAL PENGALI FS';
+        multVal.textContent = `x${Math.max(1, state.freeSpinAccumMultiplier)}`;
+      } else {
+        sky.classList.remove('free-spin-mode');
+        fsInline.classList.add('hidden');
+        multLabel.textContent = 'PENGALI PETIR';
+      }
+    }
+
+    function setBanner(msg) {
+      document.getElementById('bannerMainText').textContent = msg;
+    }
+
+    function showCelebration({ badge, title, amountText, subText }) {
+      return new Promise(resolve => {
+        audio.fanfare();
+        const modal = document.getElementById('modalCelebration');
+        document.getElementById('celebBadge').textContent = badge;
+        document.getElementById('celebTitle').textContent = title;
+        document.getElementById('celebAmount').textContent = amountText;
+        document.getElementById('celebSub').textContent = subText || 'Ketuk layar untuk melanjutkan';
+        modal.classList.remove('hidden');
+
+        const done = () => {
+          audio.click();
+          modal.classList.add('hidden');
+          modal.removeEventListener('click', done);
+          resolve();
+        };
+        modal.addEventListener('click', done);
+      });
+    }
+
+    // ================= CORE SPIN & ADMIN-DRIVEN ENGINE =================
+    function evaluateWins() {
+      const counts = {};
+      const coords = {};
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          const cell = state.grid[c][r];
+          if (!cell || cell.isMultiplier || cell.isScatter) continue;
+          counts[cell.id] = (counts[cell.id] || 0) + 1;
+          if (!coords[cell.id]) coords[cell.id] = [];
+          coords[cell.id].push({ c, r });
+        }
+      }
+      const baseBet = getBaseBet();
+      const wins = [];
+      for (const id of Object.keys(counts)) {
+        const cnt = counts[id];
+        if (cnt >= 8) {
+          const sym = SYMBOLS.find(s => s.id === id);
+          const tier = cnt >= 12 ? 2 : cnt >= 10 ? 1 : 0;
+          wins.push({
+            symbol: sym,
+            count: cnt,
+            payout: Math.round(baseBet * sym.pay[tier]),
+            coords: coords[id]
+          });
+        }
+      }
+      return wins;
+    }
+
+    async function executeSpin() {
+      if (state.isSpinning) return;
+
+      const baseBet = getBaseBet();
+      const cost = state.forceBuyFreeSpins
+        ? baseBet * 100
+        : state.inFreeSpins
+        ? 0
+        : getEffectiveBet();
+
+      if (state.balance < cost) {
+        state.autoSpinsLeft = 0;
+        state.forceBuyFreeSpins = false;
+        updateHUD();
+        showToast('Saldo tidak mencukupi untuk taruhan ini');
+        return;
+      }
+
+      state.isSpinning = true;
+      state.balance -= cost;
+      if (state.inFreeSpins) {
+        state.freeSpinsLeft--;
+      } else {
+        document.getElementById('lastWinDisplay').textContent = '0';
+        document.getElementById('totalMultiplierValue').textContent = 'x1';
+      }
+      updateHUD();
+
+      const spinIcon = document.getElementById('spinIcon');
+      spinIcon.classList.remove('spin-idle');
+      spinIcon.classList.add('spin-fast');
+      setBanner(state.inFreeSpins ? `PUTARAN GRATIS TERSISA: ${state.freeSpinsLeft}` : 'MEMUTAR GERBANG OLYMPUS...');
+
+      // Drop out current cells
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          const el = getCellEl(c, r);
+          el.classList.remove('cell-winning');
+          if (el.firstElementChild) el.firstElementChild.className = 'w-full h-full flex items-center justify-center anim-drop-out';
+        }
+      }
+      await sleep(150);
+
+      // Consume One-Shot Admin Triggers
+      const trigScatter = state.forceBuyFreeSpins || state.admin.forceScatterNext;
+      const trig500x = state.admin.force500xNext;
+      const trigMaxwin = state.admin.forceMaxwinNext;
+
+      state.forceBuyFreeSpins = false;
+      state.admin.forceScatterNext = false;
+      state.admin.force500xNext = false;
+      state.admin.forceMaxwinNext = false;
+      syncAdminCheckboxes();
+
+      // Determine WinRate / Rungkad / Hot Symbol Strategy for this spin
+      const nonScatterSyms = SYMBOLS.filter(s => !s.isScatter);
+      let hotSymbol = null;
+      let symbolCapCounts = null;
+
+      if (trigMaxwin) {
+        hotSymbol = { sym: SYMBOLS.find(s => s.id === 'crown'), biasProb: 0.55 };
+      } else if (trig500x) {
+        const highSyms = nonScatterSyms.slice(4);
+        hotSymbol = { sym: highSyms[Math.floor(Math.random() * highSyms.length)], biasProb: 0.42 };
+      } else if (state.admin.winRate > 40) {
+        // Boosted Win Rate
+        const boostChance = (state.admin.winRate - 35) / 65;
+        if (Math.random() < boostChance) {
+          const pickedSym = pickWeighted(nonScatterSyms);
+          hotSymbol = { sym: pickedSym, biasProb: 0.26 + boostChance * 0.25 };
+        }
+      } else if (state.admin.winRate < 25) {
+        // Low Win Rate / Rungkad Cap
+        if (Math.random() > (state.admin.winRate / 25)) {
+          symbolCapCounts = {};
+        }
+      }
+
+      const scatterCols = new Set();
+      if (trigScatter) {
+        [0, 1, 2, 3, 4, 5].sort(() => Math.random() - 0.5).slice(0, 4).forEach(c => scatterCols.add(c));
+      }
+
+      // Build Initial 6x5 Spin Grid
+      let hasOrbDropped = false;
+      state.grid = [];
+      for (let c = 0; c < COLS; c++) {
+        const col = [];
+        let hasSc = false;
+        const scRow = scatterCols.has(c) ? Math.floor(Math.random() * ROWS) : -1;
+
+        for (let r = 0; r < ROWS; r++) {
+          let cell;
+          if (r === scRow) {
+            cell = generateCell({ forceScatter: true });
+            hasSc = true;
+          } else {
+            cell = generateCell({
+              allowScatter: !hasSc && scRow === -1,
+              allowOrb: !symbolCapCounts,
+              hotSymbol,
+              symbolCapCounts
+            });
+            if (cell.isScatter) hasSc = true;
+          }
+          if (cell.isMultiplier) hasOrbDropped = true;
+          col.push(cell);
+        }
+        state.grid.push(col);
+      }
+
+      // Inject guaranteed x500 Orb(s) if trig500x or trigMaxwin
+      if (trig500x || trigMaxwin) {
+        const countOrbs = trigMaxwin ? 2 : 1;
+        for (let i = 0; i < countOrbs; i++) {
+          const rc = Math.floor(Math.random() * COLS);
+          const rr = Math.floor(Math.random() * ROWS);
+          state.grid[rc][rr] = pickMultiplierOrb(500);
+        }
+        hasOrbDropped = true;
+      }
+
+      // Render columns dropping
+      const dropDur = state.isTurbo ? '0.16s' : '0.28s';
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          const el = getCellEl(c, r);
+          el.style.setProperty('--drop-dur', dropDur);
+          el.innerHTML = `<div class="w-full h-full flex items-center justify-center anim-drop-in">${getSymbolSVG(state.grid[c][r])}</div>`;
+        }
+        audio.reelDrop(c);
+        await sleep(55);
+      }
+
+      if (hasOrbDropped) triggerZeusStrike();
+      await sleep(190);
+
+      // Tumble / Cascade Loop
+      let tumbleStep = 0;
+      let rawSpinWin = 0;
+
+      while (true) {
+        const wins = evaluateWins();
+        if (wins.length === 0) break;
+
+        tumbleStep++;
+        const stepWin = wins.reduce((s, w) => s + w.payout, 0);
+        rawSpinWin += stepWin;
+
+        audio.cascadeWin(tumbleStep - 1);
+        setBanner(`TUMBLE ${tumbleStep}x • PECAH ${fmtNum(rawSpinWin)}`);
+        document.getElementById('lastWinDisplay').textContent = fmtNum(rawSpinWin);
+
+        const toRemove = new Set();
+        const expDur = state.isTurbo ? '0.26s' : '0.45s';
+        wins.forEach(w => {
+          w.coords.forEach(({ c, r }) => {
+            toRemove.add(`${c},${r}`);
+            const el = getCellEl(c, r);
+            el.classList.add('cell-winning');
+            el.style.setProperty('--explode-dur', expDur);
+            if (el.firstElementChild) el.firstElementChild.classList.add('symbol-exploding');
+            spawnParticles(el, w.symbol.color);
+          });
+        });
+
+        await sleep(460);
+
+        // Cascade Refill
+        let cascadeOrb = false;
+        const cascadeCap = state.admin.winRate < 20 ? {} : null;
+        if (cascadeCap) {
+          for (let c = 0; c < COLS; c++) {
+            for (let r = 0; r < ROWS; r++) {
+              if (!toRemove.has(`${c},${r}`) && !state.grid[c][r].isMultiplier && !state.grid[c][r].isScatter) {
+                const id = state.grid[c][r].id;
+                cascadeCap[id] = (cascadeCap[id] || 0) + 1;
+              }
+            }
+          }
+        }
+
+        const cascadeHot = (!cascadeCap && state.admin.winRate >= 75 && tumbleStep < 4)
+          ? { sym: pickWeighted(nonScatterSyms), biasProb: 0.32 }
+          : null;
+
+        for (let c = 0; c < COLS; c++) {
+          const kept = [];
+          let hasSc = false;
+          for (let r = 0; r < ROWS; r++) {
+            if (!toRemove.has(`${c},${r}`)) {
+              kept.push({ cell: state.grid[c][r], fresh: false });
+              if (state.grid[c][r].isScatter) hasSc = true;
+            } else {
+              getCellEl(c, r).classList.remove('cell-winning');
+            }
+          }
+
+          const missing = ROWS - kept.length;
+          if (missing > 0) {
+            const added = [];
+            for (let i = 0; i < missing; i++) {
+              const cell = generateCell({
+                allowScatter: !hasSc,
+                allowOrb: !cascadeCap,
+                hotSymbol: cascadeHot,
+                symbolCapCounts: cascadeCap
+              });
+              if (cell.isScatter) hasSc = true;
+              if (cell.isMultiplier) cascadeOrb = true;
+              added.push({ cell, fresh: true });
+            }
+            const merged = [...added, ...kept];
+            state.grid[c] = merged.map(m => m.cell);
+
+            for (let r = 0; r < ROWS; r++) {
+              const el = getCellEl(c, r);
+              el.style.setProperty('--drop-dur', state.isTurbo ? '0.15s' : '0.25s');
+              const cls = merged[r].fresh ? 'anim-drop-in' : 'anim-cascade';
+              el.innerHTML = `<div class="w-full h-full flex items-center justify-center ${cls}">${getSymbolSVG(state.grid[c][r])}</div>`;
+            }
+          }
+        }
+
+        if (cascadeOrb) triggerZeusStrike();
+        await sleep(300);
+      }
+
+      // Sum Multiplier Orbs on Winning Spin
+      let finalWin = rawSpinWin;
+      if (rawSpinWin > 0) {
+        const orbs = [];
+        for (let c = 0; c < COLS; c++) {
+          for (let r = 0; r < ROWS; r++) {
+            if (state.grid[c][r].isMultiplier) orbs.push({ c, r, val: state.grid[c][r].multValue });
+          }
+        }
+
+        if (orbs.length > 0) {
+          const sumOrb = orbs.reduce((a, b) => a + b.val, 0);
+          triggerZeusStrike();
+          orbs.forEach(({ c, r }) => {
+            const el = getCellEl(c, r);
+            el.classList.add('cell-winning');
+            spawnParticles(el, '#38bdf8');
+          });
+
+          let activeMult = sumOrb;
+          if (state.inFreeSpins) {
+            state.freeSpinAccumMultiplier += sumOrb;
+            activeMult = state.freeSpinAccumMultiplier;
+          }
+
+          document.getElementById('totalMultiplierValue').textContent = `x${activeMult}`;
+          finalWin = rawSpinWin * activeMult;
+
+          // Cap at 5000x Maxwin if Auto Maxwin triggered or natural 5000x cap
+          const maxCap = baseBet * 5000;
+          if (trigMaxwin || finalWin > maxCap) {
+            finalWin = maxCap;
+          }
+
+          const pop = document.getElementById('orbSumPopup');
+          document.getElementById('orbEquationText').textContent = `${fmtNum(rawSpinWin)} × ${activeMult}x`;
+          document.getElementById('orbFinalText').textContent = `= ${fmtNum(finalWin)}`;
+          pop.classList.remove('hidden');
+
+          await sleep(1150);
+          pop.classList.add('hidden');
+          orbs.forEach(({ c, r }) => getCellEl(c, r).classList.remove('cell-winning'));
+        }
+      }
+
+      // Check Scatters
+      const scatters = [];
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          if (state.grid[c][r].isScatter) scatters.push({ c, r });
+        }
+      }
+
+      let startFs = false;
+      let addFs = false;
+      if (!state.inFreeSpins && scatters.length >= 4) {
+        startFs = true;
+        const scSym = SYMBOLS.find(s => s.isScatter);
+        const sTier = scatters.length >= 6 ? 2 : scatters.length === 5 ? 1 : 0;
+        finalWin += Math.round(getEffectiveBet() * scSym.pay[sTier]);
+      } else if (state.inFreeSpins && scatters.length >= 3) {
+        addFs = true;
+      }
+
+      // Award Win
+      if (finalWin > 0) {
+        state.balance += finalWin;
+        if (state.inFreeSpins) state.freeSpinSessionWin += finalWin;
+        document.getElementById('lastWinDisplay').textContent = fmtNum(finalWin);
+        setBanner(`MENANG PUTARAN: ${fmtNum(finalWin)}!`);
+
+        const multBet = finalWin / baseBet;
+        if (multBet >= 5000) {
+          await showCelebration({
+            badge: 'BATAS MAKSIMUM TERCAPAI (5.000X)!',
+            title: 'MAXWIN OLYMPUS!',
+            amountText: fmtNum(finalWin),
+            subText: 'Petir tertinggi Dewa Zeus telah ditaklukkan!'
+          });
+        } else if (multBet >= 20) {
+          const title = multBet >= 60 ? 'SENSATIONAL WIN!' : multBet >= 35 ? 'MEGA WIN!' : 'BIG WIN!';
+          await showCelebration({
+            badge: `${multBet.toFixed(0)}X LIPAT TARUHAN!`,
+            title,
+            amountText: fmtNum(finalWin)
+          });
+        }
+      } else {
+        setBanner(state.inFreeSpins ? `TOTAL SESI FREE SPIN: ${fmtNum(state.freeSpinSessionWin)}` : 'RAIH 8+ SIMBOL SAMA DI MANA SAJA!');
+      }
+
+      // Handle Free Spins Transitions
+      if (startFs) {
+        scatters.forEach(({ c, r }) => getCellEl(c, r).classList.add('cell-winning'));
+        triggerZeusStrike();
+        await sleep(600);
+        scatters.forEach(({ c, r }) => getCellEl(c, r).classList.remove('cell-winning'));
+
+        state.autoSpinsLeft = 0;
+        state.inFreeSpins = true;
+        state.freeSpinsLeft = 15;
+        state.freeSpinsTotal = 15;
+        state.freeSpinAccumMultiplier = 0;
+        state.freeSpinSessionWin = 0;
+        updateHUD();
+
+        await showCelebration({
+          badge: `${scatters.length} SCATTER ZEUS MENDARAT`,
+          title: '15 FREE SPINS!',
+          amountText: 'PENGALI AKUMULATIF AKTIF',
+          subText: 'Ketuk layar untuk memulai badai petir!'
+        });
+      } else if (addFs) {
+        triggerZeusStrike();
+        state.freeSpinsLeft += 5;
+        state.freeSpinsTotal += 5;
+        updateHUD();
+        await showCelebration({
+          badge: 'SCATTER TAMBAHAN',
+          title: '+5 FREE SPINS!',
+          amountText: `Sisa ${state.freeSpinsLeft} Putaran`
+        });
+      } else if (state.inFreeSpins && state.freeSpinsLeft <= 0) {
+        const totalWon = state.freeSpinSessionWin;
+        state.inFreeSpins = false;
+        state.freeSpinAccumMultiplier = 0;
+        updateHUD();
+        await showCelebration({
+          badge: 'PUTARAN GRATIS SELESAI',
+          title: 'TOTAL KEMENANGAN',
+          amountText: fmtNum(totalWon),
+          subText: `Dari ${state.freeSpinsTotal} Putaran Gratis`
+        });
+      }
+
+      spinIcon.classList.remove('spin-fast');
+      spinIcon.classList.add('spin-idle');
+      state.isSpinning = false;
+      updateHUD();
+
+      if (state.inFreeSpins && state.freeSpinsLeft > 0) {
+        setTimeout(() => executeSpin(), 420);
+      } else if (state.autoSpinsLeft > 0) {
+        state.autoSpinsLeft--;
+        updateHUD();
+        setTimeout(() => executeSpin(), 380);
+      }
+    }
+
+    // ================= KONAMI CODE & ADMIN PANEL LOGIC =================
+    function renderKonamiDots() {
+      const wrap = document.getElementById('konamiDots');
+      wrap.innerHTML = '';
+      for (let i = 0; i < KONAMI_SEQUENCE.length; i++) {
+        const dot = document.createElement('span');
+        const filled = i < state.konamiProgress.length;
+        dot.className = filled
+          ? 'w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24] transition-all scale-110'
+          : 'w-2.5 h-2.5 rounded-full bg-slate-700 transition-all';
+        wrap.appendChild(dot);
+      }
+    }
+
+    function openKonamiModal() {
+      state.konamiProgress = [];
+      renderKonamiDots();
+      document.getElementById('konamiStatusText').textContent = 'Gunakan tombol layar atau keyboard fisik';
+      document.getElementById('konamiStatusText').className = 'text-[11px] text-slate-400 mt-2';
+      document.getElementById('modalKonami').classList.remove('hidden');
+    }
+
+    function handleSecretTap() {
+      state.secretTapCount++;
+      clearTimeout(state.secretTapTimer);
+      if (state.secretTapCount >= 3) {
+        state.secretTapCount = 0;
+        audio.click();
+        openKonamiModal();
+      } else {
+        state.secretTapTimer = setTimeout(() => {
+          state.secretTapCount = 0;
+        }, 1200);
+      }
+    }
+
+    function inputKonamiKey(keyChar) {
+      const expected = KONAMI_SEQUENCE[state.konamiProgress.length];
+      if (keyChar === expected) {
+        state.konamiProgress.push(keyChar);
+        audio.konamiKey(state.konamiProgress.length);
+        renderKonamiDots();
+
+        if (state.konamiProgress.length === KONAMI_SEQUENCE.length) {
+          audio.konamiSuccess();
+          document.getElementById('modalKonami').classList.add('hidden');
+          state.konamiProgress = [];
+          openAdminPanel();
+        }
+      } else {
+        audio.tone(150, 'sawtooth', 0.2, 0.12, 90);
+        state.konamiProgress = [];
+        renderKonamiDots();
+        const dotsBox = document.getElementById('konamiDots');
+        dotsBox.classList.remove('animate-shake');
+        void dotsBox.offsetWidth;
+        dotsBox.classList.add('animate-shake');
+        const st = document.getElementById('konamiStatusText');
+        st.textContent = 'Kombinasi salah, direset otomatis!';
+        st.className = 'text-[11px] text-rose-400 font-bold mt-2';
+      }
+    }
+
+    function openAdminPanel() {
+      document.getElementById('adminCurrentBalance').textContent = fmtNum(state.balance);
+      document.getElementById('adminBalanceInput').value = state.balance;
+      syncAdminUI();
+      document.getElementById('modalAdmin').classList.remove('hidden');
+    }
+
+    function syncAdminCheckboxes() {
+      document.getElementById('chkForceScatter').checked = state.admin.forceScatterNext;
+      document.getElementById('chkForce500x').checked = state.admin.force500xNext;
+      document.getElementById('chkForceMaxwin').checked = state.admin.forceMaxwinNext;
+    }
+
+    function syncAdminUI() {
+      document.getElementById('sliderWinRate').value = state.admin.winRate;
+      document.getElementById('lblWinRate').textContent = `${state.admin.winRate}%`;
+      document.getElementById('sliderOrbRate').value = state.admin.orbRate;
+      document.getElementById('lblOrbRate').textContent = `${state.admin.orbRate}%`;
+      document.getElementById('adminPresetBadge').textContent = `MODE: ${state.admin.preset.toUpperCase()}`;
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        const active = btn.getAttribute('data-preset') === state.admin.preset;
+        btn.classList.toggle('border-amber-400', active);
+        btn.classList.toggle('bg-purple-950', active);
+        btn.classList.toggle('border-slate-600', !active);
+      });
+
+      document.querySelectorAll('.minmult-btn').forEach(btn => {
+        const val = parseInt(btn.getAttribute('data-minmult'), 10);
+        const active = val === state.admin.minOrbValue;
+        btn.className = active
+          ? 'minmult-btn py-1.5 rounded-lg bg-amber-500 text-black font-extrabold text-[11px]'
+          : 'minmult-btn py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-600 font-bold text-[11px]';
+      });
+
+      syncAdminCheckboxes();
+    }
+
+    function applyAdminPreset(preset) {
+      state.admin.preset = preset;
+      if (preset === 'normal') {
+        state.admin.winRate = 35;
+        state.admin.orbRate = 18;
+        state.admin.minOrbValue = 0;
+      } else if (preset === 'gacor') {
+        state.admin.winRate = 75;
+        state.admin.orbRate = 55;
+        state.admin.minOrbValue = 25;
+      } else if (preset === 'maxwin') {
+        state.admin.winRate = 95;
+        state.admin.orbRate = 90;
+        state.admin.minOrbValue = 100;
+      } else if (preset === 'rungkad') {
+        state.admin.winRate = 5;
+        state.admin.orbRate = 2;
+        state.admin.minOrbValue = 0;
+      }
+      syncAdminUI();
+    }
+
+    // ================= PAYTABLE MODAL =================
+    function renderPaytable() {
+      const grid = document.getElementById('paytableGrid');
+      const baseBet = getBaseBet();
+      grid.innerHTML = '';
+      SYMBOLS.filter(s => !s.isScatter).reverse().forEach(sym => {
+        const card = document.createElement('div');
+        card.className = 'rounded-xl bg-purple-950/80 border border-amber-400/30 p-2 flex items-center gap-2';
+        card.innerHTML = `
+          <div class="w-10 h-10 shrink-0 flex items-center justify-center bg-black/35 rounded-lg">${getSymbolSVG(sym)}</div>
+          <div class="text-[10px] leading-tight flex-1 min-w-0">
+            <div class="font-bold text-amber-200 truncate">${sym.name}</div>
+            <div class="flex justify-between text-purple-200"><span>12+:</span><strong class="text-white">${fmtNum(baseBet * sym.pay[2])}</strong></div>
+            <div class="flex justify-between text-purple-200"><span>10-11:</span><strong class="text-white">${fmtNum(baseBet * sym.pay[1])}</strong></div>
+            <div class="flex justify-between text-purple-200"><span>8-9:</span><strong class="text-white">${fmtNum(baseBet * sym.pay[0])}</strong></div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    // ================= BIND ALL EVENTS =================
+    function bindEvents() {
+      // Secret Triggers: Tap Crest 3x OR Tap Zeus 3x
+      document.getElementById('secretCrestBtn').addEventListener('click', handleSecretTap);
+      document.getElementById('zeusContainer').addEventListener('click', handleSecretTap);
+
+      // Konami Virtual Buttons
+      document.querySelectorAll('.konami-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          inputKonamiKey(btn.getAttribute('data-kkey'));
+        });
+      });
+
+      document.getElementById('btnCloseKonami').addEventListener('click', () => {
+        audio.click();
+        document.getElementById('modalKonami').classList.add('hidden');
+      });
+
+      // Physical Keyboard Support (Konami + Spacebar Spin)
+      window.addEventListener('keydown', (e) => {
+        const konamiOpen = !document.getElementById('modalKonami').classList.contains('hidden');
+        if (konamiOpen) {
+          const map = {
+            ArrowUp: 'U',
+            ArrowDown: 'D',
+            ArrowLeft: 'L',
+            ArrowRight: 'R',
+            KeyB: 'B',
+            KeyA: 'A'
+          };
+          if (map[e.code]) {
+            e.preventDefault();
+            inputKonamiKey(map[e.code]);
+          } else if (e.code === 'Escape') {
+            document.getElementById('modalKonami').classList.add('hidden');
+          }
+          return;
+        }
+
+        if (e.code === 'Space') {
+          const anyModal = ['modalAdmin', 'modalBuyFs', 'modalAuto', 'modalInfo']
+            .some(id => !document.getElementById(id).classList.contains('hidden'));
+          if (anyModal) return;
+          e.preventDefault();
+          if (!document.getElementById('modalCelebration').classList.contains('hidden')) {
+            document.getElementById('modalCelebration').click();
+            return;
+          }
+          if (!state.isSpinning) executeSpin();
+        }
+      });
+
+      // Admin Panel Controls
+      document.getElementById('btnSetBalance').addEventListener('click', () => {
+        audio.click();
+        const val = parseInt(document.getElementById('adminBalanceInput').value, 10);
+        if (!isNaN(val) && val >= 0) {
+          state.balance = val;
+          updateHUD();
+          showToast('Saldo berhasil diperbarui');
+        }
+      });
+
+      document.querySelectorAll('.admin-addbal').forEach(btn => {
+        btn.addEventListener('click', () => {
+          audio.click();
+          const add = parseInt(btn.getAttribute('data-addbal'), 10);
+          state.balance += add;
+          document.getElementById('adminBalanceInput').value = state.balance;
+          updateHUD();
+        });
+      });
+
+      document.getElementById('btnResetBalance').addEventListener('click', () => {
+        audio.click();
+        state.balance = 100000;
+        document.getElementById('adminBalanceInput').value = state.balance;
+        updateHUD();
+      });
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          audio.click();
+          applyAdminPreset(btn.getAttribute('data-preset'));
+        });
+      });
+
+      document.getElementById('sliderWinRate').addEventListener('input', (e) => {
+        state.admin.preset = 'custom';
+        state.admin.winRate = parseInt(e.target.value, 10);
+        syncAdminUI();
+      });
+
+      document.getElementById('sliderOrbRate').addEventListener('input', (e) => {
+        state.admin.preset = 'custom';
+        state.admin.orbRate = parseInt(e.target.value, 10);
+        syncAdminUI();
+      });
+
+      document.querySelectorAll('.minmult-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          audio.click();
+          state.admin.preset = 'custom';
+          state.admin.minOrbValue = parseInt(btn.getAttribute('data-minmult'), 10);
+          syncAdminUI();
+        });
+      });
+
+      document.getElementById('chkForceScatter').addEventListener('change', (e) => {
+        state.admin.forceScatterNext = e.target.checked;
+      });
+      document.getElementById('chkForce500x').addEventListener('change', (e) => {
+        state.admin.force500xNext = e.target.checked;
+      });
+      document.getElementById('chkForceMaxwin').addEventListener('change', (e) => {
+        state.admin.forceMaxwinNext = e.target.checked;
+      });
+
+      const closeAdmin = () => {
+        audio.click();
+        document.getElementById('modalAdmin').classList.add('hidden');
+        updateHUD();
+      };
+      document.getElementById('btnCloseAdminTop').addEventListener('click', closeAdmin);
+      document.getElementById('btnSaveAdmin').addEventListener('click', closeAdmin);
+
+      // Main Game Controls
+      document.getElementById('btnSpin').addEventListener('click', () => {
+        audio.click();
+        if (state.autoSpinsLeft > 0) {
+          state.autoSpinsLeft = 0;
+          updateHUD();
+          return;
+        }
+        executeSpin();
+      });
+
+      document.getElementById('btnBetDown').addEventListener('click', () => {
+        if (state.betIndex > 0) {
+          audio.click();
+          state.betIndex--;
+          updateHUD();
+        }
+      });
+
+      document.getElementById('btnBetUp').addEventListener('click', () => {
+        if (state.betIndex < BASE_BETS.length - 1) {
+          audio.click();
+          state.betIndex++;
+          updateHUD();
+        }
+      });
+
+      document.querySelectorAll('.quick-bet-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (state.isSpinning || state.inFreeSpins || state.autoSpinsLeft > 0) return;
+          audio.click();
+          state.betIndex = parseInt(btn.getAttribute('data-betidx'), 10);
+          updateHUD();
+        });
+      });
+
+      document.getElementById('btnTurbo').addEventListener('click', () => {
+        audio.click();
+        state.isTurbo = !state.isTurbo;
+        const b = document.getElementById('btnTurbo');
+        b.className = state.isTurbo
+          ? 'h-14 flex-1 sm:flex-none sm:px-6 rounded-2xl bg-amber-500 text-black border-2 border-yellow-200 text-xs sm:text-sm font-extrabold flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 shadow-lg active:scale-95 transition'
+          : 'h-14 flex-1 sm:flex-none sm:px-6 rounded-2xl bg-slate-900 border-2 border-slate-600 text-xs sm:text-sm font-extrabold text-slate-200 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 shadow-lg active:scale-95 transition';
+      });
+
+      document.getElementById('btnAnteBet').addEventListener('click', () => {
+        audio.click();
+        state.anteBet = !state.anteBet;
+        updateHUD();
+        showToast(state.anteBet ? 'Taruhan Ganda Aktif (2x Peluang Scatter)' : 'Taruhan Ganda Nonaktif');
+      });
+
+      document.getElementById('btnBuyFreeSpin').addEventListener('click', () => {
+        audio.click();
+        updateHUD();
+        document.getElementById('modalBuyFs').classList.remove('hidden');
+      });
+      document.getElementById('btnCancelBuyFs').addEventListener('click', () => {
+        audio.click();
+        document.getElementById('modalBuyFs').classList.add('hidden');
+      });
+      document.getElementById('btnConfirmBuyFs').addEventListener('click', () => {
+        audio.click();
+        document.getElementById('modalBuyFs').classList.add('hidden');
+        if (state.balance < getBaseBet() * 100) {
+          showToast('Saldo tidak mencukupi');
+          return;
+        }
+        state.forceBuyFreeSpins = true;
+        executeSpin();
+      });
+
+      document.getElementById('btnAuto').addEventListener('click', () => {
+        audio.click();
+        if (state.autoSpinsLeft > 0) {
+          state.autoSpinsLeft = 0;
+          updateHUD();
+          return;
+        }
+        if (!state.isSpinning && !state.inFreeSpins) {
+          document.getElementById('modalAuto').classList.remove('hidden');
+        }
+      });
+      document.getElementById('btnCloseAuto').addEventListener('click', () => {
+        audio.click();
+        document.getElementById('modalAuto').classList.add('hidden');
+      });
+      document.querySelectorAll('.auto-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          audio.click();
+          const cnt = parseInt(btn.getAttribute('data-auto'), 10);
+          document.getElementById('modalAuto').classList.add('hidden');
+          state.autoSpinsLeft = cnt - 1;
+          updateHUD();
+          executeSpin();
+        });
+      });
+
+      document.getElementById('btnInfo').addEventListener('click', () => {
+        audio.click();
+        renderPaytable();
+        document.getElementById('modalInfo').classList.remove('hidden');
+      });
+      document.getElementById('btnCloseInfo').addEventListener('click', () => {
+        audio.click();
+        document.getElementById('modalInfo').classList.add('hidden');
+      });
+
+      document.getElementById('btnSound').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('iconSoundOn').classList.toggle('hidden', !state.soundEnabled);
+        document.getElementById('iconSoundOff').classList.toggle('hidden', state.soundEnabled);
+        if (state.soundEnabled) audio.click();
+      });
+    }
+
+    window.onload = function () {
+      initGridDOM();
+      populateIdleGrid();
+      bindEvents();
+      updateHUD();
+    };
+  </script>
+</body>
+</html>
